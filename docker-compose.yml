@@ -1,0 +1,27 @@
+version: "3"
+
+volumes:
+  _build:
+  deps:
+  gen:
+services:
+  magpie:
+    image: gleamlang/gleam:0.9.0
+    working_dir: /opt/app
+    volumes:
+      - .:/opt/app
+      - _build:/opt/app/_build
+      - deps:/opt/app/deps
+      # FIXME Gleam issue, don't delete gen directory.
+      # - gen:/opt/app/gen
+    network_mode: host
+    environment:
+      - PORT=8000
+      - HTTPBIN_URL=http://localhost:8080
+    depends_on:
+      - httpbin
+
+  httpbin:
+    image: kennethreitz/httpbin
+    ports:
+      - "8080:80"
