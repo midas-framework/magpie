@@ -3,7 +3,7 @@ import gleam/iodata.{Iodata}
 import gleam/list
 import gleam/option.{Some, None}
 import gleam/uri.{Uri}
-import gleam/http.{Method, Message, RequestHead, ResponseHead, Get, Post, Put}
+import gleam/http.{Method, Message, RequestHead, ResponseHead, Get, Post, Put, Delete, Patch, Head, Options}
 
 external type Charlist
 
@@ -83,17 +83,18 @@ pub fn sync(
 
   // httpc errors if passing method get with 4 element request tuple, i.e. with body.
   let response = case method {
-    Get -> httpc_request_no_body(
+    Get | Head -> httpc_request_no_body(
       method,
       tuple(charlist_target, charlist_headers),
       [],
       [BodyFormat(Binary)],
     )
-    Post | Put -> httpc_request_with_body(
+    Post | Put | Patch | Delete -> httpc_request_with_body(
       method,
       tuple(
         charlist_target,
         charlist_headers,
+        // TODO fix content type
         binary_to_list(""),
         // Don't pass an io list, httpc counts length of list not bytes length.
         iodata.to_string(body),
