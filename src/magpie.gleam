@@ -68,6 +68,7 @@ external fn httpc_request_with_body(
 // Can take a body function as 2nd argument for traits
 pub fn sync(
   request: http.Request(Iodata),
+  secure: Bool,
 ) -> Result(http.Response(Iodata), Dynamic) {
   let Message(head: head, headers: headers, body: body) = request
   let RequestHead(
@@ -77,7 +78,11 @@ pub fn sync(
     path: path,
     query: query,
   ) = head
-  let target = Uri(Some("http"), None, Some(host), port, path, query, None)
+  let scheme = case secure {
+    True -> "https"
+    False -> "http"
+  }
+  let target = Uri(Some(scheme), None, Some(host), port, path, query, None)
   let charlist_target = binary_to_list(uri.to_string(target))
   let charlist_headers = list.map(headers, charlist_header)
 
