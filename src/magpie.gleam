@@ -87,19 +87,10 @@ pub fn sync(
   request: http.Request(Iodata),
   secure: Bool,
 ) -> Result(http.Response(Iodata), Dynamic) {
+
   let Message(head: head, headers: headers, body: body) = request
-  let RequestHead(
-    method: method,
-    host: host,
-    port: port,
-    path: path,
-    query: query,
-  ) = head
-  let scheme = case secure {
-    True -> "https"
-    False -> "http"
-  }
-  let target = Uri(Some(scheme), None, Some(host), port, path, query, None)
+  let method = head.method
+  let target = http.request_uri(request, secure)
   let charlist_target = binary_to_list(uri.to_string(target))
   let charlist_headers = list.map(headers, charlist_header)
 
