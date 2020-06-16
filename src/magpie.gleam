@@ -2,6 +2,7 @@ import gleam/dynamic.{Dynamic}
 import gleam/iodata.{Iodata}
 import gleam/list
 import gleam/option.{Some, None}
+import gleam/result
 import gleam/uri.{Uri}
 import gleam/http.{Method, Message, RequestHead, ResponseHead, Get, Post, Put, Delete, Patch, Head, Options}
 
@@ -65,6 +66,22 @@ external fn httpc_request_with_body(
 ) =
   "httpc" "request"
 
+// stdlib pop_map like find_map and pop like find
+fn do_key_pop(haystack, desired_key, accumulator) {
+  case haystack {
+    [] -> Error(Nil)
+    [tuple(k, v), ..rest] if k == desired_key -> {
+      let remaining = list.append(list.reverse(accumulator), rest)
+      Ok(tuple(v, remaining))
+    }
+    [x, ..rest] -> do_key_pop(rest, desired_key, [x, ..accumulator])
+  }
+}
+
+pub fn key_pop(haystack, desired_key) {
+  do_key_pop(haystack, desired_key, [])
+}
+
 // Can take a body function as 2nd argument for traits
 pub fn sync(
   request: http.Request(Iodata),
@@ -94,19 +111,25 @@ pub fn sync(
       [],
       [BodyFormat(Binary)],
     )
-    Post | Put | Patch | Delete -> httpc_request_with_body(
-      method,
-      tuple(
-        charlist_target,
-        charlist_headers,
-        // TODO fix content type
-        binary_to_list(""),
-        // Don't pass an io list, httpc counts length of list not bytes length.
-        iodata.to_string(body),
-      ),
-      [],
-      [BodyFormat(Binary)],
-    )
+    Post | Put | Patch | Delete -> {
+      let tmp = key_pop(charlist_headers, binary_to_list("content-type"))
+      let tuple(
+        content_type,
+        ch2,
+      ) = result.unwrap(tmp, tuple(binary_to_list(""), charlist_headers))
+      httpc_request_with_body(
+        method,
+        tuple(
+          charlist_target,
+          ch2,
+          content_type,
+          // Don't pass an io list, httpc counts length of list not bytes length.
+          iodata.to_string(body),
+        ),
+        [],
+        [BodyFormat(Binary)],
+      )
+    }
   }
 
   case response {

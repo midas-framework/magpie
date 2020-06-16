@@ -89,5 +89,4 @@ pub fn headers_test() {
   let Ok(headers) = dynamic.field(data, "headers")
   dynamic.field(headers, "Content-Type")
   |> should.equal(Ok(dynamic.from("application/x-www-form-urlencoded")))
-  todo
 }
