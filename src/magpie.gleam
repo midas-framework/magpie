@@ -115,13 +115,13 @@ pub fn sync(
       let tmp = key_pop(charlist_headers, binary_to_list("content-type"))
       let tuple(
         content_type,
-        ch2,
+        charlist_headers,
       ) = result.unwrap(tmp, tuple(binary_to_list(""), charlist_headers))
       httpc_request_with_body(
         method,
         tuple(
           charlist_target,
-          ch2,
+          charlist_headers,
           content_type,
           // Don't pass an io list, httpc counts length of list not bytes length.
           iodata.to_string(body),
