@@ -1,6 +1,5 @@
 import gleam/dynamic.{Dynamic}
 import gleam/map
-import gleam/option.{Some, None}
 import gleam/http.{Get, Post, Put, Delete, Patch, Head, Options}
 import magpie
 import gleam/should
@@ -23,7 +22,7 @@ pub fn head_test() {
     |> http.set_body("")
   let Ok(response) = magpie.sync(request, False)
   should.equal("", http.get_body(response))
-  let Some(content_length) = http.get_header(response, "content-length")
+  let Ok(content_length) = http.get_header(response, "content-length")
   should.not_equal("0", content_length)
 }
 

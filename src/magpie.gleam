@@ -1,5 +1,5 @@
 import gleam/dynamic.{Dynamic}
-import gleam/iodata.{Iodata}
+import gleam/string_builder.{StringBuilder}
 import gleam/list
 import gleam/option.{Some, None}
 import gleam/result
@@ -40,7 +40,7 @@ type ErlRequest {
     url: Charlist,
     headers: List(tuple(Charlist, Charlist)),
     Charlist,
-    Iodata,
+    StringBuilder,
   )
 }
 
@@ -84,9 +84,9 @@ pub fn key_pop(haystack, desired_key) {
 
 // Can take a body function as 2nd argument for traits
 pub fn sync(
-  request: http.Request(Iodata),
+  request: http.Request(StringBuilder),
   secure: Bool,
-) -> Result(http.Response(Iodata), Dynamic) {
+) -> Result(http.Response(StringBuilder), Dynamic) {
 
   let Message(head: head, headers: headers, body: body) = request
   let method = head.method
@@ -115,7 +115,7 @@ pub fn sync(
           ch2,
           content_type,
           // Don't pass an io list, httpc counts length of list not bytes length.
-          iodata.to_string(body),
+          string_builder.to_string(body),
         ),
         [],
         [BodyFormat(Binary)],
@@ -130,7 +130,7 @@ pub fn sync(
       Message(
         ResponseHead(status),
         list.map(headers, string_header),
-        iodata.from_strings([resp_body]),
+        string_builder.from_strings([resp_body]),
       ),
     )
   }

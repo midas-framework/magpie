@@ -6,7 +6,7 @@ volumes:
   gen:
 services:
   magpie:
-    image: gleamlang/gleam:0.9.0
+    image: gleamlang/gleam:0.10.0-rc2
     working_dir: /opt/app
     volumes:
       - .:/opt/app
